@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Визуализатор метро</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div class="brand"><b>М</b><span>Визуализатор метро</span></div><a class="doc-link" href="../docs/ALGORITHM.md" target="_blank" rel="noopener">Описание алгоритма ↗</a></header>
+<main>
+<div class="heading"><h1>Визуализация данных</h1></div>
+<section class="workspace">
+<div class="scene"><canvas id="view" tabindex="0" aria-label="Трёхмерное облако точек тоннеля" aria-describedby="flightHelp"></canvas>
+<div class="scene-top"><span class="live-dot"></span><span id="sceneTitle">Загрузка проездов…</span></div>
+<div id="errorBadge" class="error-badge" hidden></div>
+<div class="scene-bottom"><span>WASD — полёт · мышь — поворот · колесо — угол обзора</span><span id="pointLabel"></span></div>
+<div id="error" role="alert" hidden></div></div>
+<aside>
+<section class="panel">
+<h3>Проезд</h3>
+<select id="sequence" aria-label="Проезд" disabled></select><p id="sceneHint" class="hint"></p>
+<label class="check" hidden><input id="softConfirmation" type="checkbox" disabled> Непрерывное подтверждение (эксперимент)</label>
+<label for="labRun">Результат в сцене</label><select id="labRun" disabled><option value="recorded">Базовый детектор</option></select>
+<p id="softHint" class="hint" aria-live="polite">Базовый детектор.</p>
+</section>
+<section class="panel">
+<div id="decision" class="decision" aria-live="polite"><h3>Решение алгоритма</h3><h2 id="state">Подготовка</h2><div class="distance"><span id="distance">—</span><small>м</small></div><p id="decisionNote">Расстояние вдоль пути</p></div>
+<div class="facts"><div><span>Скорость поезда</span><b id="trainSpeed">—</b></div><div><span>Габарит до</span><b id="envelopeRange">—</b></div><div><span>Проверено до</span><b id="analysisRange">—</b></div><div><span>Расчёт кадра</span><b id="latency">—</b></div><div><span>Точек в кадре</span><b id="rawPoints">—</b></div></div>
+<p id="pathInfo" class="hint"></p>
+</section>
+<section class="panel">
+<h3>Этот кадр по разметке</h3>
+<div id="frameVerdict" class="frame-verdict"></div>
+</section>
+<section class="panel">
+<h3>Отображение</h3>
+<label class="check"><input id="colorDistance" type="checkbox" checked> Цвет точек по расстоянию</label>
+<label class="check"><input id="envelope" type="checkbox" checked> Габарит движения</label>
+<label class="check"><input id="pathLine" type="checkbox" checked> Ось пути</label>
+<label class="check"><input id="smoothPath" type="checkbox"> Доп. сглаживание показа</label>
+<p class="hint">Ось уже сглажена ядром, как в RViz. Этот фильтр сглаживает её ещё раз только в браузере; решения детектора он не меняет.</p>
+<label class="check"><input id="boxes" type="checkbox" checked> Кандидаты и препятствия</label>
+<label class="check"><input id="showTruth" type="checkbox" checked> Рамки из локальной разметки</label>
+<label for="cloudMode">Точки</label><select id="cloudMode" disabled><option value="full" selected>Все точки кадра</option><option value="filtered">Облегчённый показ, до 24 тыс.</option></select>
+<div id="modelLegend" class="legend"><span><i class="purple"></i> Габарит</span><span><i class="teal"></i> Ось пути</span><span><i class="orange"></i> Внимание</span><span>Серый — сырой кандидат</span><span><i class="red"></i> Препятствие</span></div>
+</section>
+<section class="panel">
+<h3>Камера</h3>
+<div class="camera-buttons"><button data-camera="perspective" class="selected">Обзор</button><button data-camera="cab">Из кабины</button><button data-camera="top">Сверху</button></div>
+<button id="fitCloud" type="button">Вместить облако</button>
+<p id="cameraStatus" class="camera-status">Свободная камера</p><p id="flightHelp" class="flight-help">Кликните по сцене: WASD — полёт, Q/E — вниз/вверх, Shift — быстрее, мышь — поворот, колесо — угол обзора, Esc — выйти.</p>
+</section>
+</aside>
+<div class="transport"><button id="play" class="primary" disabled>▶ Воспроизвести</button><button id="prev" aria-label="Предыдущий кадр">‹</button><button id="next" aria-label="Следующий кадр">›</button><span id="clock">00:00.0 / 00:00.0</span><div class="spacer"></div><label class="speed">Темп <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><label class="speed">Показ <select id="displayHz"><option value="0">Все кадры</option><option value="5">5 Гц</option><option value="2">2 Гц</option></select></label><button id="record">● Записать WebM</button></div>
+<div class="timeline">
+<div class="lane seek-lane"><div class="lane-label"><span class="lane-name">Проезд</span></div><input id="seek" aria-label="Положение воспроизведения по всему проезду" type="range" min="0" max="1" step="1" value="0"></div>
+<div class="lane-toolbar"><span class="lane-title">Таймлайн</span><span id="viewRange"></span><div class="spacer"></div><button id="zoomOut" type="button" aria-label="Уменьшить масштаб">−</button><button id="zoomIn" type="button" aria-label="Увеличить масштаб">+</button><button id="zoomAll" type="button">Весь проезд</button></div>
+<div id="laneArea" class="lane-area"><div id="laneRows"></div><div id="playhead" class="playhead" hidden></div><div id="laneTip" class="lane-tip" hidden></div></div>
+<p class="hint lane-help">Клик по дорожке — перейти к кадру. Клик по FP или FN — открыть ошибку в сцене. ‹ › у дорожки — предыдущее и следующее событие. Колесо с Ctrl или Shift — масштаб, перетаскивание — сдвиг.</p>
+<div class="lane-legend"><span><i style="background:#ff767c"></i>препятствие / FP</span><span><i style="background:#f4bc73"></i>внимание</span><span><i style="background:#2f7a6d"></i>путь свободен</span><span><i style="background:#a8484e"></i>FP: удержанная рамка без точек</span><span><i style="background:#bc9bff"></i>FN внутри проверенной дальности</span><span><i style="background:#7f62b8"></i>FN за проверенной дальностью</span><span><i style="background:#8fa7ff"></i>вторая рамка на цели</span><span><i style="background:#37c8d4"></i>рамка сдвинута</span><span><i style="background:#4fc3f7"></i>цель в разметке</span><span><i style="background:#ff5b61"></i>ось изгибается обратно</span></div>
+<p id="errorFocus" class="hint"></p>
+</div>
+</section>
+<section class="review" aria-label="Статистика">
+<div class="review-heading"><div><h2>Статистика</h2><p id="truthStatus">Загрузка результатов…</p></div><button id="labExport" disabled>Скачать отчёт</button></div>
+<h3>Алгоритм</h3><div id="statsAlgo" class="metric-grid"></div>
+<h3>Сверка с разметкой</h3><div id="statsTruth" class="metric-grid"></div>
+<p class="hint caveat">FP и FN считаются по рамкам из локальной разметки и могут вводить в заблуждение. Рамка — размеченная часть объекта, а не «здесь нужна тревога»; пыль, внешние кубы и спорные объекты оцениваются отдельно; пропуски за проверенной дальностью алгоритм не обещал; вторая рамка на уже найденной цели и рамка, сдвинутая от цели не дальше 1,5 м, считаются отдельно и в FP и FN не входят. Поэтому каждое событие открывается кликом по дорожке FP или FN: проверяйте глазами. Допуск рамок 0,2 м, дальность 1–300 м, спорные кубы вне основного счёта.</p>
+<details><summary>Полнота и первая дальность по каждому объекту</summary><div id="objectMetrics"></div></details>
+</section>
+<footer><span id="summary"></span></footer>
+</main><script src="camera.js"></script><script src="model-view.js"></script><script src="path-smoothing.js"></script><script src="soft-confirmation.js"></script><script src="evaluation.js"></script><script src="timeline.js"></script><script src="review.js"></script><script src="app.js"></script></body></html>

@@ -1,0 +1,43 @@
+#!/bin/bash
+# Detector + RViz in one container; recordings are played from this shell with `play`.
+#   docker run --rm -it --name metro --shm-size=512m -p 127.0.0.1:6080:6080 -v "$PWD/datasets:/data:ro" metro-lidar studio
+# or just ./run.sh (run.ps1 on Windows). AUTOPLAY=/data/<bag> in the environment starts playing at once.
+# Without an X server from the host (DISPLAY unset) RViz runs on a virtual screen shown in the
+# browser at http://localhost:6080/vnc.html. With -e DISPLAY and /tmp/.X11-unix mounted it opens
+# as a window on the host.
+source /opt/ros/humble/setup.bash
+source /opt/metro_ws/install/setup.bash
+if [ -z "$DISPLAY" ]; then
+  export DISPLAY=:99 LIBGL_ALWAYS_SOFTWARE=1
+  Xvfb :99 -screen 0 "${SCREEN:-1600x900x24}" -nolisten tcp >/tmp/xvfb.log 2>&1 &
+  for _ in $(seq 50); do xdpyinfo -display :99 >/dev/null 2>&1 && break; sleep .1; done
+  # RViz fills the virtual screen
+  mkdir -p ~/.config/openbox
+  cat >~/.config/openbox/rc.xml <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+  <applications><application class="*"><decor>no</decor><maximized>yes</maximized></application></applications>
+</openbox_config>
+XML
+  openbox >/tmp/openbox.log 2>&1 &
+  x11vnc -display :99 -forever -shared -nopw -quiet -localhost -rfbport 5900 >/tmp/x11vnc.log 2>&1 &
+  websockify --web /usr/share/novnc 6080 localhost:5900 >/tmp/novnc.log 2>&1 &
+  BROWSER_HINT="RViz в браузере: http://localhost:6080/vnc.html?autoconnect=1&resize=scale"
+fi
+ros2 launch metro_bringup detector.launch.py rviz:=true max_result_age_s:=1.0 >/tmp/detector.log 2>&1 &
+cat <<TEXT
+
+  Детектор и RViz запущены (журнал детектора: /tmp/detector.log).
+  ${BROWSER_HINT:-RViz открыт в окне на экране хоста.}
+
+  bags                               список записей в /data с номерами
+  play 1                             проиграть запись номер 1 (или play /data/<папка>)
+  play 2 0.5                         другая запись, скорость 0.5: перезапуск не нужен
+  play 3 1.0 --loop                  по кругу
+                                     во время записи: пробел пауза, стрелки вверх и вниз
+                                     скорость, вправо следующий кадр на паузе, Ctrl+C стоп
+  status                             ответы детектора по кадрам (во втором терминале:
+                                     docker exec -it metro status)
+
+TEXT
+exec bash --rcfile /etc/metro.bashrc -i

@@ -1,0 +1,20 @@
+# docker compose run --rm --service-ports metro        (or ./run.sh)
+#   METRO_DATA=/path/to/bags   folder with the recordings (default ./datasets)
+#   AUTOPLAY=/data/<bag>       start playing at once
+services:
+  metro:
+    build: .
+    image: metro-lidar
+    container_name: metro
+    command: studio
+    stdin_open: true
+    tty: true
+    shm_size: 512m
+    ports:
+      - "127.0.0.1:6080:6080"
+    volumes:
+      - "${METRO_DATA:-./datasets}:/data:ro"
+    environment:
+      - AUTOPLAY=${AUTOPLAY:-}
+      - PLAY_RATE=${PLAY_RATE:-1.0}
+      - PLAY_ARGS=${PLAY_ARGS:-}

@@ -1,0 +1,17 @@
+#!/bin/bash
+# play <bag or number from `bags`> [rate] [ros2 bag play options]: a recording with keyboard controls.
+source /opt/ros/humble/setup.bash
+source /opt/metro_ws/install/setup.bash
+bag=${1:-}
+if [[ "$bag" =~ ^[0-9]+$ ]]; then
+  bag=$(BAGS_PLAIN=1 bags | sed -n "${bag}p")
+fi
+if [ -z "$bag" ] || [ ! -f "$bag/metadata.yaml" ]; then
+  echo "Использование: play <папка записи или номер> [скорость] [--loop]; записи в /data:" >&2
+  exec bags
+fi
+rate=${2:-1.0}
+shift $(( $# < 2 ? $# : 2 ))
+echo "Запись: $bag, скорость $rate."
+echo "Пробел: пауза и продолжение. Стрелки вверх и вниз: быстрее и медленнее. Вправо: следующий кадр на паузе. Ctrl+C: стоп."
+exec ros2 bag play "$bag" --rate "$rate" --read-ahead-queue-size 20 "$@"

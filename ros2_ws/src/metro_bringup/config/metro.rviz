@@ -1,0 +1,52 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Global Options:
+    Background Color: 12; 19; 25
+    Fixed Frame: metro_lidar_analysis
+    Frame Rate: 20
+  Displays:
+    - Class: rviz_default_plugins/PointCloud2
+      Name: LiDAR
+      Enabled: true
+      Topic:
+        Value: /metro/debug/cloud
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 1
+      Size (Pixels): 2
+      Style: Points
+      Color Transformer: AxisColor
+      Axis: X
+      Use Fixed Frame: true
+      Decay Time: 0
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Clearance and candidates
+      Enabled: true
+      Topic:
+        Value: /metro/debug/markers
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Depth: 1
+    - Class: rviz_default_plugins/TF
+      Name: Frames
+      Enabled: false
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 35
+      Focal Point:
+        X: 20
+        Y: 0
+        Z: 0
+      Pitch: 0.35
+      Yaw: 3.14
+Window Geometry:
+  Width: 1600
+  Height: 900
+  X: 0
+  Y: 0

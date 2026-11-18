@@ -1,0 +1,8 @@
+#!/bin/bash
+# bags [dir]: ROS 2 recordings under /data (folders with metadata.yaml), numbered. `play 3` plays number 3.
+list=$(find "${1:-/data}" -maxdepth 4 -name metadata.yaml -printf '%h\n' 2>/dev/null | sort)
+if [ "${BAGS_PLAIN:-}" = 1 ]; then
+  echo "$list"
+else
+  echo "$list" | awk 'NF { printf "%3d  %s\n", NR, $0 }'
+fi

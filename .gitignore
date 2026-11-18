@@ -1,0 +1,60 @@
+# Local runtimes and Python caches
+.deps/
+.venv/
+.venv
+.venv-ml/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/.codex/tmp/
+/.codex/state/last_validator.txt
+
+# Local recordings and point clouds
+*.db3
+*.mcap
+*.bag
+*.pcd
+/data/
+/*.zip
+/*.zst
+/*.pdf
+
+# Secrets and local machine settings
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+
+# Generated point clouds and viewer caches
+/output/
+/viewer/data/
+
+# Original external datasets and papers
+/datasets/
+/datasets
+/dataset/
+/articles/
+/articles
+/.firecrawl/
+
+# Agent instructions and local notes stay out of the repository
+/.claude/
+/.codex/
+AGENTS.md
+CLAUDE.md
+/visualizer-readme.md
+/lidar_analysis/
+/lidar_schema.txt
+/lidar_viewer_v3.py
+/annotations/
+/data_tools/
+/learning/
+
+# C++ core build tree
+core/build/
+
+/results/
+.vscode/

@@ -1,0 +1,10 @@
+*
+!metro/
+!metro/**
+!core/
+!core/**
+core/build/
+!Dockerfile
+!ros2_ws/
+!ros2_ws/**
+**/__pycache__/

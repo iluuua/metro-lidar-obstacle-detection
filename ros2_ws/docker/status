@@ -1,0 +1,5 @@
+#!/bin/bash
+# status: one line per detector answer
+source /opt/ros/humble/setup.bash
+source /opt/metro_ws/install/setup.bash
+exec ros2 run metro_perception metro_status_echo

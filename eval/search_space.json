@@ -1,0 +1,15 @@
+{
+  "margin_k": [1.0, 1.1, 1.4],
+  "strong_points": [4, 5],
+  "weak_hits": [3, 5],
+  "hold_frames_strong": [6, 20],
+  "soft_tau_s": [2.0, 4.0],
+  "soft_reference": [0.4, 0.6],
+  "soft_threshold": [0.2, 0.4],
+  "sigma_lat_per_m": [0.002, 0.004],
+  "far_min_range": [60.0, 80.0, 100.0],
+  "far_confirm_hits": [7, 12],
+  "far_min_points": [6, 10],
+  "boundary_hits": [2, 4],
+  "hold_expect_points": [3.0, 10.0]
+}

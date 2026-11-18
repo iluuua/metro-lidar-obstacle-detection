@@ -1,0 +1,15 @@
+metro_obstacle_detector:
+  ros__parameters:
+    analysis_frame: metro_lidar_analysis
+    # Forward axis of the lidar frame (z up): auto finds it from the cloud; or +x, -x, +y, -y.
+    sensor_axes: auto
+    # Detector implementation: cpp (C++ core, ~5x faster), python (reference), auto (cpp when built).
+    backend: auto
+    # Runtime limits can be tuned on the target hardware.
+    input_timeout_s: 0.6
+    max_result_age_s: 0.5
+    worker_timeout_s: 2.0
+    startup_timeout_s: 20.0
+    max_worker_restarts: 3
+    publish_tf: true
+    publish_markers: true
